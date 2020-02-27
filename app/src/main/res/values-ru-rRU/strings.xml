@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Задание 1</string>
+    <string name="item_text">Элемент</string>
+    <string name="item_clicked">Вы нажали</string>
+</resources>
