@@ -1,6 +1,8 @@
 package com.example.mercury_task1
 
 import android.graphics.Color
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.Drawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -27,7 +29,7 @@ class MainActivity : AppCompatActivity() {
     private fun fillAdapterItems(): ArrayList<ColorItem>{
         val list = ArrayList<ColorItem>()
         for (i in 0 until ELEMENTS_NUM){
-            val d = R.drawable.ic_circle
+            val d = getDrawable(R.drawable.ic_circle)
             val c = when (i % COLORS_NUM){
                 0 -> Color.RED
                 1 -> Color.rgb(255, 165, 0)
@@ -38,8 +40,13 @@ class MainActivity : AppCompatActivity() {
                 6 -> Color.rgb(139, 0 ,255)
                 else -> Color.TRANSPARENT
             }
-            val item = ColorItem(d, c, "${getString(R.string.item_text)} ${i+1}")
-            list += item
+
+            d?.colorFilter = PorterDuffColorFilter(c, PorterDuff.Mode.SRC_IN)
+            //val d: Drawable = getDrawable(R.drawable.ic_circle)
+            if (d != null){
+                val item = ColorItem(d, c, "${getString(R.string.item_text)} ${i+1}")
+                list += item
+            }
         }
 
         return list
