@@ -6,7 +6,8 @@
     android:id="@+id/card"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/item_color_bar">
+
+    android:background="@drawable/item_color_bar">
 
     <ImageView
         android:id="@+id/imgView"
