@@ -7,7 +7,10 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
 
-    android:background="@drawable/item_color_bar">
+    android:background="?attr/selectableItemBackground"
+    android:backgroundTint="#FFFFFF"
+    android:clickable="true"
+    android:focusable="true">
 
     <ImageView
         android:id="@+id/imgView"
@@ -31,28 +34,5 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
-    <!--RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
 
-        <ImageView
-            android:id="@+id/imgView"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:src="@drawable/ic_circle"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/text1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="false"
-            android:layout_marginTop="16dp"
-            android:layout_toEndOf="@+id/imgView"
-            android:text="Line1"
-            android:textSize="18sp"
-            app:layout_constraintStart_toEndOf="@+id/imgView"
-            app:layout_constraintTop_toTopOf="@+id/imgView" />
-    </RelativeLayout-->
 
