@@ -24,16 +24,13 @@ class MainActivity : AppCompatActivity() {
         coloredItemsRecyclerView.setHasFixedSize(true)
         val itemsList = fillAdapterItems()
         coloredItemsRecyclerView.adapter = RecyclerAdapter(itemsList) { str -> Unit
-            Snackbar.make(coloredItemsRecyclerView, getString(R.string.item_clicked) + " " + str, Snackbar.LENGTH_SHORT).show()
+            Snackbar.make(coloredItemsRecyclerView, getString(R.string.item_clicked, str), Snackbar.LENGTH_SHORT).show()
         }
-
     }
 
     private fun fillAdapterItems(): ArrayList<ColorItem>{
         val list = ArrayList<ColorItem>()
-
         for (i in 0 until ELEMENTS_NUM){
-            //val d: Drawable = getDrawable(R.drawable.ic_circle)!!.mutate()
             val c = when (i % COLORS_NUM){
                 0 -> Color.RED
                 1 -> Color.rgb(255, 165, 0)
@@ -44,8 +41,7 @@ class MainActivity : AppCompatActivity() {
                 6 -> Color.rgb(139, 0 ,255)
                 else -> Color.TRANSPARENT
             }
-            //d.colorFilter =  PorterDuffColorFilter(c, PorterDuff.Mode.SRC_IN)
-            val item = ColorItem(c, getString(R.string.item_text, (i+1)))
+            val item = ColorItem(c, getString(R.string.item_text, i+1))
             list += item
         }
         return list
