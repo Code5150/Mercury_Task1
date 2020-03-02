@@ -13,7 +13,7 @@
     android:focusable="true">
 
     <ImageView
-        android:id="@+id/imgView"
+        android:id="@+id/cardImageView"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:src="@drawable/ic_circle"
@@ -22,11 +22,11 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/text1"
+        android:id="@+id/cardText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="false"
-        android:layout_toEndOf="@+id/imgView"
+        android:layout_toEndOf="@+id/cardImageView"
         android:text="Line1"
         android:textColor="@color/item_color_text"
         android:textSize="24sp"

@@ -7,35 +7,31 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.color_items_card.view.*
 
-class RecyclerAdapter(var items: ArrayList<ColorItem>, val t: String) : RecyclerView.Adapter<RecyclerAdapter.Itemholder>() {
+class RecyclerAdapter(var items: ArrayList<ColorItem>, var callbackFun:(str: String)->Unit ) : RecyclerView.Adapter<RecyclerAdapter.ItemHolder>() {
 
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Itemholder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemHolder {
         val view: View =
             LayoutInflater.from(parent.context).inflate(R.layout.color_items_card, parent, false)
-        return Itemholder(view)
+        return ItemHolder(view)
     }
     override fun getItemCount() = items.size
 
-    override fun onBindViewHolder(holder: Itemholder, position: Int) {
+    override fun onBindViewHolder(holder: ItemHolder, position: Int) {
         val curItem = items[position]
-        holder.imageView.setImageBitmap(curItem.imgResource)
-        holder.imageView.colorFilter = PorterDuffColorFilter(curItem.color, PorterDuff.Mode.SRC_IN)
+        holder.imageView.drawable.mutate().colorFilter = PorterDuffColorFilter(curItem.color, PorterDuff.Mode.SRC_IN)
         holder.textView.text = items[position].label
     }
-    inner class Itemholder(v: View):RecyclerView.ViewHolder(v), View.OnClickListener{
+    inner class ItemHolder(v: View):RecyclerView.ViewHolder(v), View.OnClickListener{
 
-        var imageView: ImageView = v.imgView
-        var textView: TextView = v.text1
+        var imageView: ImageView = v.cardImageView
+        var textView: TextView = v.cardText
 
         override fun onClick(view: View?) {
             if (view != null) {
-                Snackbar.make(view, t + " " + textView.text, Snackbar.LENGTH_SHORT).show()
+                callbackFun(textView.text.toString())
             }
         }
 

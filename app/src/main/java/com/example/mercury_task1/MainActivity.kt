@@ -1,12 +1,14 @@
 package com.example.mercury_task1
 
-import android.graphics.*
-import android.graphics.drawable.BitmapDrawable
+import android.graphics.Color
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.Drawable
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
 
 class MainActivity : AppCompatActivity() {
     private lateinit var coloredItemsRecyclerView: RecyclerView
@@ -21,14 +23,17 @@ class MainActivity : AppCompatActivity() {
         coloredItemsRecyclerView.layoutManager = LinearLayoutManager(this)
         coloredItemsRecyclerView.setHasFixedSize(true)
         val itemsList = fillAdapterItems()
-        coloredItemsRecyclerView.adapter = RecyclerAdapter(itemsList, getString(R.string.item_clicked))
+        coloredItemsRecyclerView.adapter = RecyclerAdapter(itemsList) { str -> Unit
+            Snackbar.make(window.decorView.rootView, getString(R.string.item_clicked) + " " + str, Snackbar.LENGTH_SHORT).show()
+        }
 
     }
 
     private fun fillAdapterItems(): ArrayList<ColorItem>{
         val list = ArrayList<ColorItem>()
-        val d: Drawable = getDrawable(R.drawable.ic_circle)!!
+
         for (i in 0 until ELEMENTS_NUM){
+            //val d: Drawable = getDrawable(R.drawable.ic_circle)!!.mutate()
             val c = when (i % COLORS_NUM){
                 0 -> Color.RED
                 1 -> Color.rgb(255, 165, 0)
@@ -39,18 +44,10 @@ class MainActivity : AppCompatActivity() {
                 6 -> Color.rgb(139, 0 ,255)
                 else -> Color.TRANSPARENT
             }
-            val b: Bitmap = convertToBitmap(d)
-            val item = ColorItem(b, c,  "${getString(R.string.item_text)} ${i+1}")
+            //d.colorFilter =  PorterDuffColorFilter(c, PorterDuff.Mode.SRC_IN)
+            val item = ColorItem(c, getString(R.string.item_text, (i+1)))
             list += item
         }
         return list
-    }
-
-    private fun convertToBitmap(d: Drawable): Bitmap{
-        val b: Bitmap = Bitmap.createBitmap(d.intrinsicWidth, d.intrinsicHeight, Bitmap.Config.ARGB_8888)
-        val canvas: Canvas = Canvas(b)
-        d.setBounds(0, 0, canvas.width, canvas.height)
-        d.draw(canvas)
-        return b
     }
 }
