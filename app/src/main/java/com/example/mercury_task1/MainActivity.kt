@@ -24,7 +24,7 @@ class MainActivity : AppCompatActivity() {
         coloredItemsRecyclerView.setHasFixedSize(true)
         val itemsList = fillAdapterItems()
         coloredItemsRecyclerView.adapter = RecyclerAdapter(itemsList) { str -> Unit
-            Snackbar.make(window.decorView.rootView.findViewById(R.id.coloredItemsRecyclerView), getString(R.string.item_clicked) + " " + str, Snackbar.LENGTH_SHORT).show()
+            Snackbar.make(coloredItemsRecyclerView, getString(R.string.item_clicked) + " " + str, Snackbar.LENGTH_SHORT).show()
         }
 
     }
