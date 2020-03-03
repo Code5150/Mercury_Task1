@@ -39,7 +39,7 @@ class MainActivity : AppCompatActivity() {
                 4 -> Color.rgb(66, 170, 255)
                 5 -> Color.BLUE
                 6 -> Color.rgb(139, 0 ,255)
-                else -> Color.TRANSPARENT
+                else -> 0
             }
             val item = ColorItem(c, getString(R.string.item_text, i+1))
             list += item
