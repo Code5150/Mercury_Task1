@@ -10,7 +10,11 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.color_items_card.view.*
 
-class RecyclerAdapter(private val items: ArrayList<ColorItem>, private val callbackFun:(str: String)->Unit ) : RecyclerView.Adapter<RecyclerAdapter.ItemHolder>() {
+enum class Types(val type: Int){
+    VISIBLE_CIRCLE(0), INVISIBLE_CIRCLE(1)
+}
+
+class RecyclerAdapter(private val items: List<ColorItem>, private val callbackFun:(str: String)->Unit ) : RecyclerView.Adapter<RecyclerAdapter.ItemHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemHolder {
         val view: View =
@@ -20,10 +24,10 @@ class RecyclerAdapter(private val items: ArrayList<ColorItem>, private val callb
     override fun getItemCount() = items.size
 
     override fun getItemViewType(position: Int): Int {
-        if(position % 8 == 0){
-            return 1;
+        if(!items[position].circleVisible){
+            return Types.INVISIBLE_CIRCLE.type
         }
-        else return 0
+        else return Types.VISIBLE_CIRCLE.type
     }
 
     override fun onBindViewHolder(holder: ItemHolder, position: Int) {

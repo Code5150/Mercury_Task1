@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity() {
         coloredItemsRecyclerView.layoutManager = LinearLayoutManager(this)
         coloredItemsRecyclerView.setHasFixedSize(true)
         val itemsList = fillAdapterItems()
-        coloredItemsRecyclerView.adapter = RecyclerAdapter(itemsList) { str -> Unit
+        coloredItemsRecyclerView.adapter = RecyclerAdapter(itemsList) { str ->
             Snackbar.make(coloredItemsRecyclerView, getString(R.string.item_clicked, str), Snackbar.LENGTH_SHORT).show()
         }
     }
@@ -38,7 +38,11 @@ class MainActivity : AppCompatActivity() {
                 6 -> Color.rgb(139, 0 ,255)
                 else -> 0
             }
-            val item = ColorItem(c, getString(R.string.item_text, i+1))
+            var visible: Boolean = when (i % COLORS_NUM) {
+                7 -> false
+                else -> true
+            }
+            val item = ColorItem(c, getString(R.string.item_text, i+1), visible)
             list += item
         }
         return list
