@@ -1,6 +1,5 @@
 package com.example.mercury_task1
 
-import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.view.LayoutInflater
@@ -43,7 +42,6 @@ class RecyclerAdapter(private val items: ArrayList<ColorItem>, private val callb
         override fun onClick(view: View?) = callbackFun(textView.text.toString())
 
         init {
-
             v.setOnClickListener(this)
         }
     }
