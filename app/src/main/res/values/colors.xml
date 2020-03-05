@@ -3,4 +3,8 @@
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
+    <color name="barPressed">#5d5d5d</color>
+    <color name="barDefaultText">#8d8d8d</color>
+    <color name="defaultWhite">#ffffff</color>
+    <color name="textPressed">#efefef</color>
 </resources>

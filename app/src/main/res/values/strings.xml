@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Mercury_Task1</string>
+    <string name="item_text">Item %d</string>
+    <string name="item_clicked">You clicked %s</string>
 </resources>
