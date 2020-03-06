@@ -5,22 +5,30 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.coroutines.*
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), CoroutineScope{
+
+    private var localJob: Job = Job()
+    override val coroutineContext = Dispatchers.Default + localJob
 
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        println("Hello!")
-        val intent: Intent = Intent(this, ColorListActivity::class.java)
-        CoroutineScope(Dispatchers.Main).launch{
-            delayedActivityLaunch(2000L, intent)
+        if(savedInstanceState == null){
+            val intent: Intent = Intent(this, ColorListActivity::class.java)
+            localJob = launch {
+                delayedActivityLaunch(2000L, intent)
+            }
         }
     }
 
-    private suspend fun delayedActivityLaunch(delayTime: Long, intent: Intent){
-        delay(delayTime)
-        startActivity(intent)
-        println("Activity launched")
-        finish()
+    override fun finish() {
+        cancel()
+        super.finish()
     }
+
+    private suspend fun delayedActivityLaunch(delayTime: Long, intent: Intent){
+            delay(delayTime)
+            startActivity(intent)
+            finish()
+        }
 }
