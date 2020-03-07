@@ -21,6 +21,16 @@ class MainActivity : AppCompatActivity(), CoroutineScope{
         }
     }
 
+    override fun onUserLeaveHint() {
+        super.onUserLeaveHint()
+        finish()
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        finish()
+    }
+
     override fun finish() {
         cancel()
         super.finish()
