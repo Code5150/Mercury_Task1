@@ -5,15 +5,15 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.coroutines.*
 
-class MainActivity : AppCompatActivity(), CoroutineScope{
+class MainActivity : AppCompatActivity(), CoroutineScope {
 
     private var localJob: Job = Job()
     override val coroutineContext = Dispatchers.Default + localJob
 
-    override fun onCreate(savedInstanceState: Bundle?){
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        if(savedInstanceState == null){
+        if (savedInstanceState == null) {
             val intent: Intent = Intent(this, ColorListActivity::class.java)
             localJob = launch {
                 delayedActivityLaunch(2000L, intent)
@@ -32,13 +32,13 @@ class MainActivity : AppCompatActivity(), CoroutineScope{
     }
 
     override fun finish() {
-        cancel()
+        localJob.cancel()
         super.finish()
     }
 
-    private suspend fun delayedActivityLaunch(delayTime: Long, intent: Intent){
-            delay(delayTime)
-            startActivity(intent)
-            finish()
-        }
+    private suspend fun delayedActivityLaunch(delayTime: Long, intent: Intent) {
+        delay(delayTime)
+        startActivity(intent)
+        finish()
+    }
 }
