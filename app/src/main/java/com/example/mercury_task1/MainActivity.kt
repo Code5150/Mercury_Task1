@@ -21,19 +21,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         }
     }
 
-    override fun onUserLeaveHint() {
-        super.onUserLeaveHint()
-        finish()
-    }
-
-    override fun onBackPressed() {
-        super.onBackPressed()
-        finish()
-    }
-
-    override fun finish() {
+    override fun onStop() {
         localJob.cancel()
-        super.finish()
+        super.onStop()
     }
 
     private suspend fun delayedActivityLaunch(delayTime: Long, intent: Intent) {
