@@ -13,12 +13,14 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        if (savedInstanceState == null) {
-            val intent: Intent = Intent(this, ColorListActivity::class.java)
-            localJob = launch {
-                delayedActivityLaunch(2000L, intent)
-            }
+    }
+
+    override fun onStart() {
+        val intent: Intent = Intent(this, ColorListActivity::class.java)
+        localJob = launch {
+            delayedActivityLaunch(2000L, intent)
         }
+        super.onStart()
     }
 
     override fun onStop() {
