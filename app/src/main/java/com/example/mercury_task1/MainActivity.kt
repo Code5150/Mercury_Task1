@@ -6,14 +6,16 @@ import android.os.SystemClock
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.coroutines.*
 
-val DELAY_TIME: String = "DELAY_TIME"
-
 class MainActivity : AppCompatActivity(), CoroutineScope {
 
+    companion object{
+        const val DELAY_TIME: String = "DELAY_TIME"
+    }
+    
     private var localJob: Job = Job()
     override val coroutineContext = Dispatchers.Default + localJob
     private var delayTime: Long = 2000L
-    private var currentDate: Long = 0L
+    private var activityStartTime: Long = 0L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -21,12 +23,12 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         if (savedInstanceState != null) {
             delayTime = savedInstanceState.getLong(DELAY_TIME)
         }
-        currentDate = SystemClock.elapsedRealtime()
+        activityStartTime = SystemClock.elapsedRealtime()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        delayTime -= SystemClock.elapsedRealtime() - currentDate
+        delayTime -= SystemClock.elapsedRealtime() - activityStartTime
         outState.putLong(DELAY_TIME, delayTime)
     }
 
