@@ -1,50 +1,55 @@
 package com.example.mercury_task1
 
-import android.graphics.Color
+import android.content.Intent
 import android.os.Bundle
+import android.os.SystemClock
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.*
 
-class MainActivity : AppCompatActivity() {
-    private lateinit var coloredItemsRecyclerView: RecyclerView
+class MainActivity : AppCompatActivity(), CoroutineScope {
 
-    private val ELEMENTS_NUM: Int = 50
-    private val COLORS_NUM: Int = 8
+    companion object{
+        const val DELAY_TIME: String = "DELAY_TIME"
+    }
+    
+    private var localJob: Job = Job()
+    override val coroutineContext = Dispatchers.Default + localJob
+    private var delayTime: Long = 2000L
+    private var activityStartTime: Long = 0L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        coloredItemsRecyclerView = findViewById(R.id.coloredItemsRecyclerView)
-        coloredItemsRecyclerView.layoutManager = LinearLayoutManager(this)
-        coloredItemsRecyclerView.setHasFixedSize(true)
-        val itemsList = fillAdapterItems()
-        coloredItemsRecyclerView.adapter = RecyclerAdapter(itemsList) { str ->
-            Snackbar.make(coloredItemsRecyclerView, getString(R.string.item_clicked, str), Snackbar.LENGTH_SHORT).show()
+        if (savedInstanceState != null) {
+            delayTime = savedInstanceState.getLong(DELAY_TIME)
         }
+        activityStartTime = SystemClock.elapsedRealtime()
     }
 
-    private fun fillAdapterItems(): ArrayList<ColorItem>{
-        val list = ArrayList<ColorItem>()
-        for (i in 0 until ELEMENTS_NUM){
-            val c = when (i % COLORS_NUM){
-                0 -> Color.RED
-                1 -> Color.rgb(255, 165, 0)
-                2 -> Color.YELLOW
-                3 -> Color.GREEN
-                4 -> Color.rgb(66, 170, 255)
-                5 -> Color.BLUE
-                6 -> Color.rgb(139, 0 ,255)
-                else -> 0
-            }
-            var visible: Boolean = when (i % COLORS_NUM) {
-                7 -> false
-                else -> true
-            }
-            val item = ColorItem(c, getString(R.string.item_text, i+1), visible)
-            list += item
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        delayTime -= SystemClock.elapsedRealtime() - activityStartTime
+        outState.putLong(DELAY_TIME, delayTime)
+    }
+
+    override fun onStart() {
+        val intent: Intent = Intent(this, ColorListActivity::class.java)
+        localJob = launch {
+            delayedActivityLaunch(intent)
         }
-        return list
+        super.onStart()
+    }
+
+    override fun onStop() {
+        localJob.cancel()
+        super.onStop()
+    }
+
+    private suspend fun delayedActivityLaunch(intent: Intent) {
+        if (delayTime > 0) {
+            delay(delayTime)
+        }
+        startActivity(intent)
+        finish()
     }
 }
