@@ -2,4 +2,6 @@
     <string name="app_name">Mercury_Task1</string>
     <string name="item_text">Item %d</string>
     <string name="item_clicked">You clicked %s</string>
+    <string name="element_color">Color:</string>
+    <string name="create_element">Create</string>
 </resources>
