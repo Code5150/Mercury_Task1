@@ -4,4 +4,6 @@
     <string name="item_clicked">Вы нажали %s</string>
     <string name="element_color">Цвет:</string>
     <string name="create_element">Создать</string>
+    <string name="delete_element_title">Удалить элемент</string>
+    <string name="delete_element">Вы уверены?</string>
 </resources>

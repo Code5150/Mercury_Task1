@@ -4,4 +4,6 @@
     <string name="item_clicked">You clicked %s</string>
     <string name="element_color">Color:</string>
     <string name="create_element">Create</string>
+    <string name="delete_element_title">Delete</string>
+    <string name="delete_element">Are you sure?</string>
 </resources>
