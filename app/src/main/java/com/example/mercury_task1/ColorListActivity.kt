@@ -33,12 +33,16 @@ class ColorListActivity : AppCompatActivity(){
         coloredItemsRecyclerView.layoutManager = LinearLayoutManager(this)
         coloredItemsRecyclerView.setHasFixedSize(true)
 
-
-        if (ColorTableDAO.checkIfExistsDB(baseContext)) {
-            itemsList = ColorTableDAO.getAdapterItemsFromDB(this@ColorListActivity)
-        } else {
-            itemsList = fillAdapterItems()
+        val itemsFromDB = Thread {
+            if (ColorTableDAO.checkIfExistsDB(baseContext)) {
+                itemsList = ColorTableDAO.getAdapterItemsFromDB(this@ColorListActivity)
+            } else {
+                itemsList = fillAdapterItems()
+            }
         }
+        itemsFromDB.start()
+
+        itemsFromDB.join()
         coloredItemsRecyclerView.adapter = RecyclerAdapter(itemsList) { str ->
             Snackbar.make(
                 coloredItemsRecyclerView,
@@ -46,7 +50,6 @@ class ColorListActivity : AppCompatActivity(){
                 Snackbar.LENGTH_SHORT
             ).show()
         }
-
 
         val itemTouchHelper =
             ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
@@ -64,14 +67,13 @@ class ColorListActivity : AppCompatActivity(){
                     deleteDialog.setTitle(R.string.delete_element_title)
                     deleteDialog.setMessage(R.string.delete_element)
                     deleteDialog.setPositiveButton(android.R.string.yes) { _, _ ->
-                        println("Item ID: ${itemsList[pos].label.filter { it.isDigit() }}")
-                        println("Before:")
-                        ColorTableDAO.getAdapterItemsFromDB(this@ColorListActivity)
-                        ColorTableDAO.deleteColorItemFromDB(
+                        val thread = Thread {
+                            ColorTableDAO.deleteColorItemFromDB(
                                 this@ColorListActivity,
                                 itemsList[pos].label.filter { it.isDigit() })
-                        println("After:")
-                        ColorTableDAO.getAdapterItemsFromDB(this@ColorListActivity)
+                        }
+                        thread.start()
+                        thread.join()
                         itemsList.removeAt(pos)
                         (coloredItemsRecyclerView.adapter as RecyclerAdapter).notifyDataSetChanged()
                     }
@@ -86,7 +88,6 @@ class ColorListActivity : AppCompatActivity(){
 
         val fab: View = findViewById(R.id.fab_add)
         fab.setOnClickListener {
-            ColorTableDAO.getAdapterItemsFromDB(this@ColorListActivity)
             val intent = Intent(this, CreateElementActivity::class.java)
             startActivityForResult(intent, CODE_RESULT)
         }

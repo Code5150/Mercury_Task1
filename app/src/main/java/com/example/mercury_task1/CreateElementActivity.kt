@@ -11,10 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.pes.androidmaterialcolorpickerdialog.ColorPicker
 import kotlinx.coroutines.*
 
-class CreateElementActivity : AppCompatActivity(), CoroutineScope {
-    private var localJob: Job = Job()
-    override val coroutineContext = Dispatchers.Default + localJob
-
+class CreateElementActivity : AppCompatActivity() {
     private lateinit var itemName: String
     private var itemColor: Int = Color.BLACK
 
@@ -22,7 +19,14 @@ class CreateElementActivity : AppCompatActivity(), CoroutineScope {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_element)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        itemName = getString(R.string.item_text, ColorTableDAO.getMaxId(this@CreateElementActivity) + 1)
+        val thread = Thread {
+            itemName = getString(
+                R.string.item_text,
+                ColorTableDAO.getMaxId(this@CreateElementActivity) + 1
+            )
+        }
+        thread.start()
+        thread.join()
         this.title = itemName
         val colorButton = findViewById<Button>(R.id.colorButton)
         val createElementButton = findViewById<Button>(R.id.createElementButton)
@@ -43,9 +47,11 @@ class CreateElementActivity : AppCompatActivity(), CoroutineScope {
             val resultItem = ColorItem(itemColor, itemName, true)
             returnIntent.putExtra(ColorListActivity.ITEM_RESULT, resultItem)
             setResult(Activity.RESULT_OK, returnIntent)
-            launch(coroutineContext) {
+            val thread = Thread {
                 ColorTableDAO.putColorItemIntoDB(this@CreateElementActivity, resultItem)
             }
+            thread.start()
+            thread.join()
             finish()
         }
     }
