@@ -1,6 +1,7 @@
 package com.example.mercury_task1
 
-import android.content.ContentValues
+import android.app.Activity
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
@@ -8,8 +9,11 @@ import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import com.pes.androidmaterialcolorpickerdialog.ColorPicker
+import kotlinx.coroutines.*
 
-class CreateElementActivity : AppCompatActivity() {
+class CreateElementActivity : AppCompatActivity(), CoroutineScope {
+    private var localJob: Job = Job()
+    override val coroutineContext = Dispatchers.Default + localJob
 
     private lateinit var itemName: String
     private var itemColor: Int = Color.BLACK
@@ -18,8 +22,7 @@ class CreateElementActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_element)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        val db = ColorDBHelper(this).writableDatabase
-        itemName = getString(R.string.item_text, ColorDBHelper.getMaxId(db) + 1)
+        itemName = getString(R.string.item_text, ColorTableDAO.getMaxId(this@CreateElementActivity) + 1)
         this.title = itemName
         val colorButton = findViewById<Button>(R.id.colorButton)
         val createElementButton = findViewById<Button>(R.id.createElementButton)
@@ -36,13 +39,14 @@ class CreateElementActivity : AppCompatActivity() {
             }
         }
         createElementButton.setOnClickListener {
-            val values = ContentValues().apply {
-                put(ColorDBHelper.DB_COL_COLOR, itemColor)
-                put(ColorDBHelper.DB_COL_VISIBLE, 1)
+            val returnIntent = Intent()
+            val resultItem = ColorItem(itemColor, itemName, true)
+            returnIntent.putExtra(ColorListActivity.ITEM_RESULT, resultItem)
+            setResult(Activity.RESULT_OK, returnIntent)
+            launch(coroutineContext) {
+                ColorTableDAO.putColorItemIntoDB(this@CreateElementActivity, resultItem)
             }
-            ColorListActivity.itemsList.add(ColorItem(itemColor, itemName, true))
-            db.insert(ColorDBHelper.DB_COLOR_TABLE_NAME, null, values)
-            onSupportNavigateUp()
+            finish()
         }
     }
 

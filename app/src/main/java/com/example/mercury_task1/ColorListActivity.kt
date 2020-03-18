@@ -1,9 +1,7 @@
 package com.example.mercury_task1
 
-import android.content.ContentValues
-import android.content.Context
+import android.app.Activity
 import android.content.Intent
-import android.database.sqlite.SQLiteDatabase
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
@@ -13,15 +11,19 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.*
 
-class ColorListActivity : AppCompatActivity() {
+class ColorListActivity : AppCompatActivity(){
+
     private lateinit var coloredItemsRecyclerView: RecyclerView
+    private lateinit var itemsList: ArrayList<ColorItem>
 
     private val ELEMENTS_NUM: Int = 50
     private val COLORS_NUM: Int = 8
+    private val CODE_RESULT: Int = 1
 
     companion object {
-        lateinit var itemsList: ArrayList<ColorItem>
+        const val ITEM_RESULT: String = "ITEM_RESULT"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,17 +33,12 @@ class ColorListActivity : AppCompatActivity() {
         coloredItemsRecyclerView.layoutManager = LinearLayoutManager(this)
         coloredItemsRecyclerView.setHasFixedSize(true)
 
-        val db: SQLiteDatabase =
-            baseContext.openOrCreateDatabase("app.db", Context.MODE_PRIVATE, null)
 
-        if (ColorDBHelper.checkIfAlreadyExists(db)) {
-            itemsList = getAdapterItemsFromDB()
+        if (ColorTableDAO.checkIfExistsDB(baseContext)) {
+            itemsList = ColorTableDAO.getAdapterItemsFromDB(this@ColorListActivity)
         } else {
-            db.execSQL(ColorDBHelper.CREATE_COLOR_DB)
             itemsList = fillAdapterItems()
         }
-        db.close()
-
         coloredItemsRecyclerView.adapter = RecyclerAdapter(itemsList) { str ->
             Snackbar.make(
                 coloredItemsRecyclerView,
@@ -49,6 +46,7 @@ class ColorListActivity : AppCompatActivity() {
                 Snackbar.LENGTH_SHORT
             ).show()
         }
+
 
         val itemTouchHelper =
             ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
@@ -66,16 +64,15 @@ class ColorListActivity : AppCompatActivity() {
                     deleteDialog.setTitle(R.string.delete_element_title)
                     deleteDialog.setMessage(R.string.delete_element)
                     deleteDialog.setPositiveButton(android.R.string.yes) { _, _ ->
-                        val dbIndex: String = itemsList[pos].label.filter { it.isDigit() }
+                        println("Item ID: ${itemsList[pos].label.filter { it.isDigit() }}")
+                        println("Before:")
+                        ColorTableDAO.getAdapterItemsFromDB(this@ColorListActivity)
+                        ColorTableDAO.deleteColorItemFromDB(
+                                this@ColorListActivity,
+                                itemsList[pos].label.filter { it.isDigit() })
+                        println("After:")
+                        ColorTableDAO.getAdapterItemsFromDB(this@ColorListActivity)
                         itemsList.removeAt(pos)
-                        val dbWritable = ColorDBHelper(this@ColorListActivity).writableDatabase
-                        val selection = "${ColorDBHelper.DB_COL_ID} LIKE ?"
-                        val selectionArgs = arrayOf(dbIndex)
-                        dbWritable.delete(
-                            ColorDBHelper.DB_COLOR_TABLE_NAME,
-                            selection,
-                            selectionArgs
-                        )
                         (coloredItemsRecyclerView.adapter as RecyclerAdapter).notifyDataSetChanged()
                     }
                     deleteDialog.setNegativeButton(android.R.string.no) { _, _ ->
@@ -89,19 +86,30 @@ class ColorListActivity : AppCompatActivity() {
 
         val fab: View = findViewById(R.id.fab_add)
         fab.setOnClickListener {
+            ColorTableDAO.getAdapterItemsFromDB(this@ColorListActivity)
             val intent = Intent(this, CreateElementActivity::class.java)
-            startActivity(intent)
+            startActivityForResult(intent, CODE_RESULT)
         }
     }
 
-    override fun onResume() {
-        (coloredItemsRecyclerView.adapter as RecyclerAdapter).notifyDataSetChanged()
-        super.onResume()
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == CODE_RESULT) {
+            if (resultCode == Activity.RESULT_OK) {
+                if (data != null) {
+                    itemsList.add(
+                        itemsList.size,
+                        data.getParcelableExtra(ColorListActivity.ITEM_RESULT)
+                    )
+                    coloredItemsRecyclerView.adapter!!.notifyItemInserted(itemsList.size - 1)
+                    coloredItemsRecyclerView.scrollToPosition(itemsList.size - 1)
+                }
+            }
+        }
     }
 
     private fun fillAdapterItems(): ArrayList<ColorItem> {
         val list = ArrayList<ColorItem>()
-        val dbWritable = ColorDBHelper(this).writableDatabase
         for (i in 0 until ELEMENTS_NUM) {
             val c = when (i % COLORS_NUM) {
                 0 -> Color.RED
@@ -117,48 +125,9 @@ class ColorListActivity : AppCompatActivity() {
                 7 -> false
                 else -> true
             }
-            val values = ContentValues().apply {
-                put(ColorDBHelper.DB_COL_COLOR, c)
-                put(
-                    ColorDBHelper.DB_COL_VISIBLE, (if (visible) {
-                        1
-                    } else {
-                        0
-                    })
-                )
-            }
-            dbWritable.insert(ColorDBHelper.DB_COLOR_TABLE_NAME, null, values)
             val item = ColorItem(c, getString(R.string.item_text, i + 1), visible)
+            ColorTableDAO.putColorItemIntoDB(this@ColorListActivity, item)
             list += item
-        }
-        return list
-    }
-
-    private fun getAdapterItemsFromDB(): ArrayList<ColorItem> {
-        val list = ArrayList<ColorItem>()
-        val dbReadable = ColorDBHelper(this).readableDatabase
-        val projection = arrayOf(
-            ColorDBHelper.DB_COL_ID,
-            ColorDBHelper.DB_COL_COLOR,
-            ColorDBHelper.DB_COL_VISIBLE
-        )
-        val sortOrder = "${ColorDBHelper.DB_COL_ID} ASC"
-        val cursor = dbReadable.query(
-            ColorDBHelper.DB_COLOR_TABLE_NAME,
-            projection,
-            null,
-            null,
-            null,
-            null,
-            sortOrder
-        )
-        with(cursor) {
-            while (moveToNext()) {
-                val itemId = getInt(getColumnIndexOrThrow(ColorDBHelper.DB_COL_ID))
-                val itemColor = getInt(getColumnIndexOrThrow(ColorDBHelper.DB_COL_COLOR))
-                val itemVisible = getInt(getColumnIndexOrThrow(ColorDBHelper.DB_COL_VISIBLE)) == 1
-                list += ColorItem(itemColor, getString(R.string.item_text, itemId), itemVisible)
-            }
         }
         return list
     }
