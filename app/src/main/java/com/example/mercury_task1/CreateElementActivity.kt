@@ -9,7 +9,6 @@ import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import com.pes.androidmaterialcolorpickerdialog.ColorPicker
-import kotlinx.coroutines.*
 
 class CreateElementActivity : AppCompatActivity() {
     private lateinit var itemName: String
@@ -24,10 +23,9 @@ class CreateElementActivity : AppCompatActivity() {
                 R.string.item_text,
                 ColorTableDAO.getMaxId(this@CreateElementActivity) + 1
             )
+            this@CreateElementActivity.title = itemName
         }
         thread.start()
-        thread.join()
-        this.title = itemName
         val colorButton = findViewById<Button>(R.id.colorButton)
         val createElementButton = findViewById<Button>(R.id.createElementButton)
         colorButton.background.colorFilter =
@@ -51,7 +49,6 @@ class CreateElementActivity : AppCompatActivity() {
                 ColorTableDAO.putColorItemIntoDB(this@CreateElementActivity, resultItem)
             }
             thread.start()
-            thread.join()
             finish()
         }
     }

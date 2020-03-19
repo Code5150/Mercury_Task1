@@ -2,14 +2,14 @@ package com.example.mercury_task1
 
 import android.content.ContentValues
 import android.content.Context
-import android.database.sqlite.SQLiteDatabase
+import android.database.Cursor
 
 class ColorTableDAO() {
     companion object {
         fun putColorItemIntoDB(context: Context, item: ColorItem) {
             val db = ColorDBHelper(context).writableDatabase
             val values = ContentValues().apply {
-                put(ColorDBHelper.DB_COL_ID, ColorDBHelper.getMaxId(db) + 1)
+                put(ColorDBHelper.DB_COL_ID, getMaxId(context) + 1)
                 put(ColorDBHelper.DB_COL_COLOR, item.color)
                 put(
                     ColorDBHelper.DB_COL_VISIBLE, (if (item.circleVisible) {
@@ -22,13 +22,6 @@ class ColorTableDAO() {
             println(values.toString())
             db.insert(ColorDBHelper.DB_COLOR_TABLE_NAME, null, values)
             db.close()
-        }
-
-        fun getMaxId(context: Context): Int {
-            val db = ColorDBHelper(context).writableDatabase
-            val result = ColorDBHelper.getMaxId(db)
-            db.close()
-            return result
         }
 
         fun deleteColorItemFromDB(context: Context, id: String) {
@@ -75,28 +68,45 @@ class ColorTableDAO() {
                     println("ID: $itemId, Color: $itemColor, Visible: $itemVisible")
                 }
             }
+            cursor.close()
             dbReadable.close()
             return list
         }
 
-        fun idList(context: Context){
-            val dbReadable = ColorDBHelper(context).readableDatabase
-            ColorDBHelper.idList(dbReadable)
-            dbReadable.close()
+        fun getMaxId(context: Context): Int {
+            val db = ColorDBHelper(context).writableDatabase
+            val cursor = db.rawQuery("SELECT MAX(${ColorDBHelper.DB_COL_ID}) as ${ColorDBHelper.DB_COL_ID} FROM ${ColorDBHelper.DB_COLOR_TABLE_NAME}", null)
+            var max = 0
+            with(cursor) {
+                if(moveToFirst()) {
+                    max = getInt(getColumnIndexOrThrow(ColorDBHelper.DB_COL_ID))
+                }
+            }
+            cursor.close()
+            db.close()
+            println("Max ID: $max")
+            return max
         }
 
-        fun checkIfExistsDB(baseContext: Context): Boolean {
-            val db: SQLiteDatabase =
-                baseContext.openOrCreateDatabase("app.db", Context.MODE_PRIVATE, null)
-            db.execSQL(ColorDBHelper.DELETE_COLOR_DB)
-            if (ColorDBHelper.checkIfAlreadyExists(db)) {
+        fun checkIfTableExists(context: Context): Boolean{
+            val db = ColorDBHelper(context).readableDatabase
+            val cursor: Cursor? = db.query(
+                ColorDBHelper.DB_COLOR_TABLE_NAME, null,
+                null, null, null, null, null
+            )
+            if (cursor != null) {
+                cursor.close()
                 db.close()
                 return true
             } else {
-                db.execSQL(ColorDBHelper.CREATE_COLOR_DB)
                 db.close()
                 return false
             }
+        }
+
+        fun createDatabase(context: Context){
+            val db = ColorDBHelper(context).writableDatabase
+            db.execSQL(ColorDBHelper.CREATE_COLOR_DB)
         }
     }
 }

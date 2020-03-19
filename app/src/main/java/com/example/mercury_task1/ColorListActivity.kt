@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.*
 
 class ColorListActivity : AppCompatActivity(){
 
@@ -34,22 +33,21 @@ class ColorListActivity : AppCompatActivity(){
         coloredItemsRecyclerView.setHasFixedSize(true)
 
         val itemsFromDB = Thread {
-            if (ColorTableDAO.checkIfExistsDB(baseContext)) {
+            if (ColorTableDAO.checkIfTableExists(this@ColorListActivity)) {
                 itemsList = ColorTableDAO.getAdapterItemsFromDB(this@ColorListActivity)
             } else {
+                ColorTableDAO.createDatabase(this@ColorListActivity)
                 itemsList = fillAdapterItems()
+            }
+            coloredItemsRecyclerView.adapter = RecyclerAdapter(itemsList) { str ->
+                Snackbar.make(
+                    coloredItemsRecyclerView,
+                    getString(R.string.item_clicked, str),
+                    Snackbar.LENGTH_SHORT
+                ).show()
             }
         }
         itemsFromDB.start()
-
-        itemsFromDB.join()
-        coloredItemsRecyclerView.adapter = RecyclerAdapter(itemsList) { str ->
-            Snackbar.make(
-                coloredItemsRecyclerView,
-                getString(R.string.item_clicked, str),
-                Snackbar.LENGTH_SHORT
-            ).show()
-        }
 
         val itemTouchHelper =
             ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
@@ -71,11 +69,11 @@ class ColorListActivity : AppCompatActivity(){
                             ColorTableDAO.deleteColorItemFromDB(
                                 this@ColorListActivity,
                                 itemsList[pos].label.filter { it.isDigit() })
+                            itemsList.removeAt(pos)
                         }
                         thread.start()
-                        thread.join()
-                        itemsList.removeAt(pos)
                         (coloredItemsRecyclerView.adapter as RecyclerAdapter).notifyDataSetChanged()
+                        thread.join()
                     }
                     deleteDialog.setNegativeButton(android.R.string.no) { _, _ ->
                         (coloredItemsRecyclerView.adapter as RecyclerAdapter).notifyItemChanged(pos)
