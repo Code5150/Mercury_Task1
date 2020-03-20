@@ -23,7 +23,9 @@ class CreateElementActivity : AppCompatActivity() {
                 R.string.item_text,
                 ColorTableDAO.getMaxId(this@CreateElementActivity) + 1
             )
-            this@CreateElementActivity.title = itemName
+            runOnUiThread {
+                this@CreateElementActivity.title = itemName
+            }
         }
         thread.start()
         val colorButton = findViewById<Button>(R.id.colorButton)
