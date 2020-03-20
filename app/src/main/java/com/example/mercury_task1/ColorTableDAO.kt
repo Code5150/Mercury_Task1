@@ -8,6 +8,7 @@ class ColorTableDAO() {
     companion object {
         fun putColorItemIntoDB(context: Context, item: ColorItem) {
             val db = ColorDBHelper(context).writableDatabase
+            db.enableWriteAheadLogging()
             val values = ContentValues().apply {
                 put(ColorDBHelper.DB_COL_ID, getMaxId(context) + 1)
                 put(ColorDBHelper.DB_COL_COLOR, item.color)
@@ -26,6 +27,7 @@ class ColorTableDAO() {
 
         fun deleteColorItemFromDB(context: Context, id: String) {
             val db = ColorDBHelper(context).writableDatabase
+            db.enableWriteAheadLogging()
             val selection = "${ColorDBHelper.DB_COL_ID} = ?"
             val selectionArgs = arrayOf(id)
             db.delete(
@@ -38,14 +40,15 @@ class ColorTableDAO() {
 
         fun getAdapterItemsFromDB(context: Context): ArrayList<ColorItem> {
             val list = ArrayList<ColorItem>()
-            val dbReadable = ColorDBHelper(context).readableDatabase
+            val db = ColorDBHelper(context).readableDatabase
+            db.enableWriteAheadLogging()
             val projection = arrayOf(
                 ColorDBHelper.DB_COL_ID,
                 ColorDBHelper.DB_COL_COLOR,
                 ColorDBHelper.DB_COL_VISIBLE
             )
             val sortOrder = "${ColorDBHelper.DB_COL_ID} ASC"
-            val cursor = dbReadable.query(
+            val cursor = db.query(
                 ColorDBHelper.DB_COLOR_TABLE_NAME,
                 projection,
                 null,
@@ -69,12 +72,13 @@ class ColorTableDAO() {
                 }
             }
             cursor.close()
-            dbReadable.close()
+            db.close()
             return list
         }
 
         fun getMaxId(context: Context): Int {
-            val db = ColorDBHelper(context).writableDatabase
+            val db = ColorDBHelper(context).readableDatabase
+            db.enableWriteAheadLogging()
             val cursor = db.rawQuery("SELECT MAX(${ColorDBHelper.DB_COL_ID}) as ${ColorDBHelper.DB_COL_ID} FROM ${ColorDBHelper.DB_COLOR_TABLE_NAME}", null)
             var max = 0
             with(cursor) {
@@ -90,14 +94,23 @@ class ColorTableDAO() {
 
         fun checkIfTableExists(context: Context): Boolean{
             val db = ColorDBHelper(context).readableDatabase
+            db.enableWriteAheadLogging()
             val cursor: Cursor? = db.query(
                 ColorDBHelper.DB_COLOR_TABLE_NAME, null,
                 null, null, null, null, null
             )
+            println(cursor)
             if (cursor != null) {
-                cursor.close()
-                db.close()
-                return true
+                if(cursor.moveToFirst()) {
+                    cursor.close()
+                    db.close()
+                    return true
+                }
+                else{
+                    cursor.close()
+                    db.close()
+                    return false
+                }
             } else {
                 db.close()
                 return false
@@ -107,6 +120,7 @@ class ColorTableDAO() {
         fun createDatabase(context: Context){
             val db = ColorDBHelper(context).writableDatabase
             db.execSQL(ColorDBHelper.CREATE_COLOR_DB)
+            db.close()
         }
     }
 }

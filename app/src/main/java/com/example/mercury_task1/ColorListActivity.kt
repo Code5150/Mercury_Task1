@@ -34,17 +34,21 @@ class ColorListActivity : AppCompatActivity(){
 
         val itemsFromDB = Thread {
             if (ColorTableDAO.checkIfTableExists(this@ColorListActivity)) {
+                println("DB already exists")
                 itemsList = ColorTableDAO.getAdapterItemsFromDB(this@ColorListActivity)
             } else {
+                println("Creating DB")
                 ColorTableDAO.createDatabase(this@ColorListActivity)
                 itemsList = fillAdapterItems()
             }
-            coloredItemsRecyclerView.adapter = RecyclerAdapter(itemsList) { str ->
-                Snackbar.make(
-                    coloredItemsRecyclerView,
-                    getString(R.string.item_clicked, str),
-                    Snackbar.LENGTH_SHORT
-                ).show()
+            runOnUiThread {
+                coloredItemsRecyclerView.adapter = RecyclerAdapter(itemsList) { str ->
+                    Snackbar.make(
+                        coloredItemsRecyclerView,
+                        getString(R.string.item_clicked, str),
+                        Snackbar.LENGTH_SHORT
+                    ).show()
+                }
             }
         }
         itemsFromDB.start()
@@ -70,10 +74,12 @@ class ColorListActivity : AppCompatActivity(){
                                 this@ColorListActivity,
                                 itemsList[pos].label.filter { it.isDigit() })
                             itemsList.removeAt(pos)
+                            runOnUiThread {
+                                (coloredItemsRecyclerView.adapter as RecyclerAdapter).notifyDataSetChanged()
+                            }
                         }
                         thread.start()
-                        (coloredItemsRecyclerView.adapter as RecyclerAdapter).notifyDataSetChanged()
-                        thread.join()
+                        //thread.join()
                     }
                     deleteDialog.setNegativeButton(android.R.string.no) { _, _ ->
                         (coloredItemsRecyclerView.adapter as RecyclerAdapter).notifyItemChanged(pos)
