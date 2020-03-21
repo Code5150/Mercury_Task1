@@ -143,7 +143,7 @@ class ColorTableDAO() {
                         6 -> Color.rgb(139, 0, 255)
                         else -> 0
                     }
-                    var visible: Boolean = when (i % ColorDBHelper.DEFAULT_COLORS_NUM) {
+                    val visible: Boolean = when (i % ColorDBHelper.DEFAULT_COLORS_NUM) {
                         7 -> false
                         else -> true
                     }
