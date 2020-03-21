@@ -21,6 +21,8 @@ class ColorDBHelper(context: Context) :
     }
 
     companion object {
+        const val DEFAULT_ELEMENTS_NUM: Int = 50
+        const val DEFAULT_COLORS_NUM: Int = 8
         private const val DATABASE_VERSION = 1
         const val DATABASE_NAME = "app.db"
         const val DB_COLOR_TABLE_NAME: String = "colors"
