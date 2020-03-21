@@ -28,28 +28,6 @@ class ColorTableDAO() {
             }
         }
 
-        fun putColorItemListIntoDB(context: Context, itemList: ArrayList<ColorItem>) {
-            synchronized(this)
-            {
-                val db = ColorDBHelper(context).writableDatabase
-                for (item in itemList) {
-                    println(item.toString())
-                    db.insert(ColorDBHelper.DB_COLOR_TABLE_NAME, null, ContentValues().apply {
-                        put(ColorDBHelper.DB_COL_ID, item.label.filter { it.isDigit() })
-                        put(ColorDBHelper.DB_COL_COLOR, item.color)
-                        put(
-                            ColorDBHelper.DB_COL_VISIBLE, (if (item.circleVisible) {
-                                1
-                            } else {
-                                0
-                            })
-                        )
-                    })
-                }
-                db.close()
-            }
-        }
-
         fun deleteColorItemFromDB(context: Context, id: String) {
             synchronized(this) {
                 val db = ColorDBHelper(context).writableDatabase
@@ -149,7 +127,7 @@ class ColorTableDAO() {
             }
         }
 
-        fun createDatabase(context: Context): ArrayList<ColorItem>{
+        fun createDatabase(context: Context): ArrayList<ColorItem> {
             val list = ArrayList<ColorItem>()
             synchronized(this) {
                 val db = ColorDBHelper(context).writableDatabase
@@ -171,7 +149,7 @@ class ColorTableDAO() {
                     }
                     list += ColorItem(c, context.getString(R.string.item_text, i + 1), visible)
                     db.insert(ColorDBHelper.DB_COLOR_TABLE_NAME, null, ContentValues().apply {
-                        put(ColorDBHelper.DB_COL_ID, i+1)
+                        put(ColorDBHelper.DB_COL_ID, i + 1)
                         put(ColorDBHelper.DB_COL_COLOR, c)
                         put(
                             ColorDBHelper.DB_COL_VISIBLE, (if (visible) {
