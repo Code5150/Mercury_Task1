@@ -18,9 +18,9 @@ class CreateElementActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_element)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        itemName = getString(R.string.item_text)
         val thread = Thread {
-            itemName = getString(
-                R.string.item_text,
+            itemName = itemName.format(
                 ColorTableDAO.getMaxId(this@CreateElementActivity) + 1
             )
             runOnUiThread {

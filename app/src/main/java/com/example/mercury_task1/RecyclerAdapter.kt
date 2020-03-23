@@ -29,15 +29,12 @@ class RecyclerAdapter(
     override fun getItemCount() = items.size
 
     override fun getItemViewType(position: Int): Int {
-
-        if (!items[position].circleVisible) {
-            return CIRCLE_INVISIBLE
-        } else return CIRCLE_VISIBLE
+        return if (!items[position].circleVisible) CIRCLE_INVISIBLE else CIRCLE_VISIBLE
     }
 
     override fun onBindViewHolder(holder: ItemHolder, position: Int) {
         val curItem = items[position]
-        if (getItemViewType(position) == 1) {
+        if (getItemViewType(position) == CIRCLE_INVISIBLE) {
             holder.imageView.visibility = View.INVISIBLE
         } else holder.imageView.drawable.mutate().colorFilter =
             PorterDuffColorFilter(curItem.color, PorterDuff.Mode.SRC_IN);

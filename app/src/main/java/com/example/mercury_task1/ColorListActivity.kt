@@ -39,12 +39,14 @@ class ColorListActivity : AppCompatActivity() {
                 itemsList = ColorTableDAO.createDatabase(this@ColorListActivity)
             }
             runOnUiThread {
-                coloredItemsRecyclerView.adapter = RecyclerAdapter(itemsList) { str ->
-                    Snackbar.make(
-                        coloredItemsRecyclerView,
-                        getString(R.string.item_clicked, str),
-                        Snackbar.LENGTH_SHORT
-                    ).show()
+                synchronized(itemsList) {
+                    coloredItemsRecyclerView.adapter = RecyclerAdapter(itemsList) { str ->
+                        Snackbar.make(
+                            coloredItemsRecyclerView,
+                            getString(R.string.item_clicked, str),
+                            Snackbar.LENGTH_SHORT
+                        ).show()
+                    }
                 }
             }
         }
@@ -67,12 +69,14 @@ class ColorListActivity : AppCompatActivity() {
                     deleteDialog.setMessage(R.string.delete_element)
                     deleteDialog.setPositiveButton(android.R.string.yes) { _, _ ->
                         val thread = Thread {
-                            ColorTableDAO.deleteColorItemFromDB(
-                                this@ColorListActivity,
-                                itemsList[pos].label.filter { it.isDigit() })
-                            itemsList.removeAt(pos)
-                            runOnUiThread {
-                                coloredItemsRecyclerView.adapter!!.notifyDataSetChanged()
+                            synchronized(itemsList) {
+                                ColorTableDAO.deleteColorItemFromDB(
+                                    this@ColorListActivity,
+                                    itemsList[pos].label.filter { it.isDigit() })
+                                itemsList.removeAt(pos)
+                                runOnUiThread {
+                                    coloredItemsRecyclerView.adapter!!.notifyDataSetChanged()
+                                }
                             }
                         }
                         thread.start()
@@ -98,12 +102,14 @@ class ColorListActivity : AppCompatActivity() {
         if (requestCode == CODE_RESULT) {
             if (resultCode == Activity.RESULT_OK) {
                 if (data != null) {
-                    itemsList.add(
-                        itemsList.size,
-                        data.getParcelableExtra(ColorListActivity.ITEM_RESULT)
-                    )
-                    coloredItemsRecyclerView.adapter!!.notifyItemInserted(itemsList.size - 1)
-                    coloredItemsRecyclerView.scrollToPosition(itemsList.size - 1)
+                    synchronized(itemsList) {
+                        itemsList.add(
+                            itemsList.size,
+                            data.getParcelableExtra(ColorListActivity.ITEM_RESULT)
+                        )
+                        coloredItemsRecyclerView.adapter!!.notifyItemInserted(itemsList.size - 1)
+                        coloredItemsRecyclerView.scrollToPosition(itemsList.size - 1)
+                    }
                 }
             }
         }
